@@ -1,3 +1,5 @@
+# frozen-string-literal: true
+
 require 'socket'
 require_relative 'httprequest'
 require_relative 'httpresponse'
