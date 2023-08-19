@@ -65,8 +65,8 @@ class Response
   end
 end
 
-server = TCPServer.new('127.0.0.1', 8080)
-puts 'Server started on port 8080'
+server = TCPServer.new('127.0.0.1', 8888)
+puts 'Server started on port 8888'
 
 loop do
   client = server.accept

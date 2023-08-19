@@ -2,6 +2,11 @@ require 'socket'
 require_relative 'httprequest'
 require_relative 'httpresponse'
 
+# subdomains point to website_root
+hosts = { 'test.localhost' => '/home/errorxyz/Documents/ruby_proj',
+          'website.localhost' => '/home/errorxyz/Documents/errorxyz.github.io',
+          'localhost' => '/home/errorxyz/Documents/ruby_proj' }
+
 server = TCPServer.new('127.0.0.1', 8888)
 puts 'Listening on port 8888...'
 
@@ -10,9 +15,14 @@ loop do
   request = client.readpartial 2048
 
   request = HttpRequest.new(request)
-  response = HttpResponse.new(request, '/home/errorxyz/Documents/ruby_proj')
 
-  puts "#{client.peeraddr[3]} #{request.path} - #{response.http_code}"
+  host = request.headers.fetch(:host).split(':')[0]
+  website_root = hosts[host]
+  website_root = hosts['localhost'] if website_root.nil?
+
+  response = HttpResponse.new(request, website_root)
+
+  puts "#{client.peeraddr[3]} #{host}#{request.path} - #{response.http_code}"
   response.send(client)
   client.close
 end

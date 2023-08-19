@@ -26,7 +26,7 @@ class HttpResponse
 
   private
 
-  # TODO - separately handle static and dynamic files and endpoints
+  # TODO: separately handle static and dynamic files and endpoints
   # parse response.data
   def handle_get(httprequest)
     @data = File.binread(@server_root + httprequest.path)
