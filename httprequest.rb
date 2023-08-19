@@ -30,25 +30,19 @@ class HttpRequest
 
   def parse_get
     @path, params = @path.split('?')
-    if @path == '/'
-      @path = '/index.html'
-    end
+    @path = '/index.html' if @path == '/'
 
     @params = {}
 
-    if !params.nil?
-      params.split('&').each do |param|
-        key, val = param.split('=')
-        key = key.to_sym
-        @params[key] = val
-      end
+    params&.split('&')&.each do |param|
+      key, val = param.split('=')
+      key = key.to_sym
+      @params[key] = val
     end
   end
 
   def parse_post(raw_request)
-    if @path == '/'
-      @path = '/index.html'
-    end
+    @path = '/index.html' if @path == '/'
 
     if headers[:"content-type"] == 'application/x-www-form-urlencoded'
       parse_form(raw_request)
@@ -66,12 +60,10 @@ class HttpRequest
     @post_data = {}
     params = raw_request.lines[-1]
 
-    if !params.nil?
-      params.split('&').each do |param|
-        key, val = param.split('=')
-        key = key.to_sym
-        @post_data[key] = val
-      end
+    params&.split('&')&.each do |param|
+      key, val = param.split('=')
+      key = key.to_sym
+      @post_data[key] = val
     end
   end
 end

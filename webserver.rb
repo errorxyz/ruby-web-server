@@ -13,9 +13,7 @@ end
 def parse_headers(request)
   headers = {}
   request.lines[1..].each do |line|
-    if line == "\r\n"
-      return headers
-    end
+    return headers if line == "\r\n"
 
     header, value = line.split(' ')
     header = header.gsub(':', ' ').downcase.to_sym
