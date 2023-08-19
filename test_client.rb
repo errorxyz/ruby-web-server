@@ -10,7 +10,7 @@ loop do
   request = client.readpartial 2048
 
   request = HttpRequest.new(request)
-  response = HttpResponse.new(request)
+  response = HttpResponse.new(request, '/home/errorxyz/Documents/ruby_proj')
 
   puts "#{client.peeraddr[3]} #{request.path} - #{response.http_code}"
   response.send(client)

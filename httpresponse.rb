@@ -4,13 +4,12 @@
 class HttpResponse
   attr_reader :http_code, :data
 
-  SERVER_ROOT = '/home/errorxyz/Documents/ruby_proj/'
-
-  def initialize(httprequest)
+  def initialize(httprequest, server_root)
+    @server_root = server_root
     if httprequest.unsupported
       @http_code = 500
       @data = File.binread('500.html')
-    elsif !File.exist?(SERVER_ROOT + httprequest.path)
+    elsif !File.exist?(@server_root + httprequest.path)
       @http_code = 404
       @data = File.binread('404.html')
     elsif httprequest.method == 'GET'
@@ -27,15 +26,15 @@ class HttpResponse
 
   private
 
-  # TODO - separately handle static and dynamic files
+  # TODO - separately handle static and dynamic files and endpoints
   # parse response.data
   def handle_get(httprequest)
-    @data = File.binread(SERVER_ROOT + httprequest.path)
+    @data = File.binread(@server_root + httprequest.path)
   end
 
   # parse response.data
   def handle_post(httprequest)
-    @data = File.binread(SERVER_ROOT + httprequest.path)
+    @data = File.binread(@server_root + httprequest.path)
   end
 
   def parse_response
