@@ -9,7 +9,7 @@ hosts = { 'test.localhost' => '/home/errorxyz/Documents/ruby_proj',
           'website.localhost' => '/home/errorxyz/Documents/errorxyz.github.io',
           'localhost' => '/home/errorxyz/Documents/ruby_proj' }
 
-server = TCPServer.new('127.0.0.1', 8888)
+server = TCPServer.new('0.0.0.0', 8888)
 puts 'Listening on port 8888...'
 
 loop do
@@ -24,7 +24,7 @@ loop do
 
   response = HttpResponse.new(request, website_root)
 
-  puts "#{client.peeraddr[3]} #{host}#{request.path} - #{response.http_code}"
+  puts "#{client.peeraddr[3]} #{request.method} #{host}#{request.path} - #{response.http_code}"
   response.send(client)
   client.close
 end

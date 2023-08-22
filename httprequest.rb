@@ -1,5 +1,7 @@
 # frozen-string-literal: true
 
+# TODO: url decode
+
 # http request object
 class HttpRequest
   attr_reader :version, :path, :params, :method, :headers, :post_data, :unsupported
