@@ -1,5 +1,7 @@
 # frozen-string-literal: true
 
+require_relative 'app'
+
 MIME_TYPES = {
   'ai' => 'application/postscript',
   'asc' => 'text/plain',
@@ -74,24 +76,39 @@ MIME_TYPES = {
 
 # http response object
 class HttpResponse
-  attr_reader :http_code, :data, :headers
+  attr_reader :http_code, :data, :headers, :file_path, :server_root, :is_static
 
   def initialize(httprequest, server_root)
     @server_root = server_root
+    @headers = {}
+
+    # TODO: validate path
+
     if httprequest.unsupported
-      @http_code = 500
-      @data = File.binread('500.html')
-    elsif !File.exist?(@server_root + httprequest.path)
-      @http_code = 404
-      @data = File.binread('404.html')
-      headers['content-type'] = 'text/html'
-    elsif httprequest.method == 'GET'
-      handle_get(httprequest)
-    elsif httprequest.method == 'POST'
-      handle_post(httprequest)
+      @http_code = 501
+      @file_path = "#{@server_root}/501.html"
+      @data = File.binread(@file_path)
+      finish_response
+      return
     end
 
-    parse_response(httprequest)
+    if httprequest.path.start_with?('/static/')
+      @file_path = @server_root + httprequest.path
+      @is_static = true
+    else
+      @file_path = @server_root + httprequest.path # add .rb extension?
+    end
+
+    if !File.exist?(@file_path) # will /form exist? or /form.rb
+      @http_code = 404
+      @file_path = "#{@server_root}/404.html"
+      @data = File.binread(@file_path)
+    else
+      @http_code = 200
+      prepare_response(httprequest)
+    end
+
+    finish_response
   end
 
   def send(client)
@@ -100,22 +117,40 @@ class HttpResponse
 
   private
 
-  # TODO: separately handle static and dynamic files and endpoints
-  # parse response.data
+  # TODO: handle dynamic files and endpoints
+
+  # Prepares data part of response and sets content-type?
+  def prepare_response(httprequest)
+    if httprequest.method == 'GET'
+      handle_get(httprequest)
+    elsif httprequest.method == 'POST'
+      handle_post(httprequest)
+    end
+  end
+
   def handle_get(httprequest)
-    @http_code = 200
-    @data = File.binread(@server_root + httprequest.path)
+    if is_static
+      @data = File.binread(@file_path)
+    else
+      # render result
+      params = httprequest.params
+      @data = File.binread(@file_path)
+    end
   end
 
-  # parse response.data
   def handle_post(httprequest)
-    @http_code = 200
-    @data = File.binread(@server_root + httprequest.path)
+    # render result
+    post_data = httprequest.post_data
+    @data = File.binread(@file_path)
   end
 
-  def parse_response(httprequest)
+  # Compiles all parts of response
+  def finish_response
+    # TODO: add Date, Encoding, Connection, Cookie headers
+
+    headers['content-type'] = MIME_TYPES.fetch(@file_path.split('.')[-1])
     @response = "HTTP/1.1 #{@http_code}\r\n" \
-                "Content-Type: #{MIME_TYPES.fetch(httprequest.path.split('.')[-1])}\r\n" \
+                "Content-Type: #{headers['content-type']}\r\n" \
                 "Content-Length: #{@data.size}\r\n" \
                 "\r\n" \
                 "#{@data}\r\n"

@@ -1,0 +1,10 @@
+if static file:
+    return it
+else:
+    render file using erb
+
+if file ext is not in request.path (like /form) get it from form.rb?
+
+use class for endpoints and respond_to? for 404 errors???
+
+how to handle endpoints like /users/<id>?? // cant handle this
